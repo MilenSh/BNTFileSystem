@@ -5,9 +5,9 @@ VisualStudioVersion = 17.2.32526.322
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BNTFileSystemProgram", "BNTFileSystemProgram\BNTFileSystemProgram.csproj", "{FBA74B7E-E4A3-40B9-ABE5-EEDB96D4522A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BussinessLayer", "BussinessLayer\BussinessLayer.csproj", "{355665C0-1BB7-4820-8012-A9B1DDE7F66D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BusinessLayer", "BussinessLayer\BusinessLayer.csproj", "{355665C0-1BB7-4820-8012-A9B1DDE7F66D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataLayer", "DataLayer\DataLayer.csproj", "{96FAEDFD-B8A9-4E8B-84F2-99573A56DC8B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataLayer", "DataLayer\DataLayer.csproj", "{96FAEDFD-B8A9-4E8B-84F2-99573A56DC8B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
