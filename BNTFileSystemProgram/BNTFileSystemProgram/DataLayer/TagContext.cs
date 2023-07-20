@@ -74,14 +74,34 @@ namespace DataLayer
                 throw new Exception(ex.Message);
             }
         }
+        public async Task UpdateAsync(string key)
+        {
+            try
+            {
+                Tag? tag = await _context.Tags.FindAsync(key);
+                if(tag != null)
+                {
+                    _context.Tags.Update(tag);
+                    await _context.SaveChangesAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+
+                throw new Exception(ex.Message);
+            }
+        }
 
         public async Task DeleteAsync(string key)
         {
             try
             {
                 var tagFromDb = await _context.Tags.FindAsync(key);
-                _context.Tags.Remove(tagFromDb);
-                await _context.SaveChangesAsync();
+                if (tagFromDb != null)
+                {
+                    _context.Tags.Remove(tagFromDb);
+                    await _context.SaveChangesAsync();
+                }
             }
             catch (Exception ex)
             {

@@ -8,20 +8,20 @@ using System.Threading.Tasks;
 
 namespace DataLayer
 {
-    public class GenreContext : IDb<Genre, string>
+    public class FormatContext : IDb<Format, string>
     {
         private readonly ApplicationDbContext _context;
 
-        public GenreContext(ApplicationDbContext context)
+        public FormatContext(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        public async Task CreateAsync(Genre item)
+        public async Task CreateAsync(Format item)
         {
             try
             {
-                _context.Genres.Add(item);
+                _context.Formats.Add(item);
                 await _context.SaveChangesAsync();
             }
             catch (Exception ex)
@@ -31,13 +31,13 @@ namespace DataLayer
             }
         }
 
-        public async Task<Genre> ReadAsync(string key)
+        public async Task<Format> ReadAsync(string key)
         {
             try
             {
-                return await _context.Genres.
+                return await _context.Formats.
                     Include(v => v.Videos).
-                    SingleAsync(g => g.GenreId == key);
+                    SingleAsync(f => f.FormatId == key);
             }
             catch (Exception ex)
             {
@@ -46,11 +46,11 @@ namespace DataLayer
             }
         }
 
-        public async Task<IEnumerable<Genre>> ReadAllAsync()
+        public async Task<IEnumerable<Format>> ReadAllAsync()
         {
             try
             {
-                return await _context.Genres.
+                return await _context.Formats.
                     Include(v => v.Videos).
                     ToListAsync();
             }
@@ -61,12 +61,29 @@ namespace DataLayer
             }
         }
 
-        public async Task UpdateAsync(Genre item)
+        public async Task UpdateAsync(Format item)
         {
             try
             {
-                _context.Genres.Update(item);
+                _context.Formats.Update(item);
                 await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+
+                throw new Exception(ex.Message);
+            }
+        }
+        public async Task UpdateAsync(string key)
+        {
+            try
+            {
+                Format? format = await _context.Formats.FindAsync(key);
+                if (format != null)
+                {
+                    _context.Formats.Update(format);
+                    await _context.SaveChangesAsync();
+                }
             }
             catch (Exception ex)
             {
@@ -79,9 +96,12 @@ namespace DataLayer
         {
             try
             {
-                var genreFromDb = await _context.Genres.FindAsync(key);
-                _context.Genres.Remove(genreFromDb);
-                await _context.SaveChangesAsync();
+                var formatFromDb = await _context.Formats.FindAsync(key);
+                if(formatFromDb != null)
+                {
+                    _context.Formats.Remove(formatFromDb);
+                    await _context.SaveChangesAsync();
+                }
             }
             catch (Exception ex)
             {

@@ -80,14 +80,34 @@ namespace DataLayer
                 throw new Exception(ex.Message);
             }
         }
+        public async Task UpdateAsync(string key)
+        {
+            try
+            {
+                Video? video = await _context.Videos.FindAsync(key);
+                if(video != null)
+                {
+                    _context.Videos.Update(video);
+                    await _context.SaveChangesAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+
+                throw new Exception(ex.Message);
+            }
+        }
 
         public async Task DeleteAsync(string key)
         {
             try
             {
                 var videoFromDb = await _context.Videos.FindAsync(key);
-                _context.Videos.Remove(videoFromDb);
-                await _context.SaveChangesAsync();
+                if(videoFromDb != null)
+                {
+                    _context.Videos.Remove(videoFromDb);
+                    await _context.SaveChangesAsync();
+                }
             }
             catch (Exception ex)
             {
