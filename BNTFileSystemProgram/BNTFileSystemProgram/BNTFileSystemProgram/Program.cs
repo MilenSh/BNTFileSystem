@@ -1,5 +1,8 @@
-namespace BNTFileSystemProgram
-{
+namespace BNTFileSystemProgram;
+using BussinessLayer;
+using DataLayer;
+
+
     public class Program
     {
         public static void Main(string[] args)
@@ -8,6 +11,24 @@ namespace BNTFileSystemProgram
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+            builder.Services.AddDbContext<ApplicationDbContext>();
+            builder.Services.AddScoped<IDb<Author, string>, AuthorContext>();
+            builder.Services.AddScoped<IDb<Format, string>, FormatContext>();
+            builder.Services.AddScoped<IDb<Genre, string>, GenreContext>();
+            builder.Services.AddScoped<IDb<Tag, string>, TagContext>();
+            builder.Services.AddScoped<IDb<Video, string>, VideoContext>();
+
+        builder.Services.AddControllersWithViews();
+            
+            
+
+
+
+
+
+
+
+
 
             var app = builder.Build();
 
@@ -33,4 +54,3 @@ namespace BNTFileSystemProgram
             app.Run();
         }
     }
-}

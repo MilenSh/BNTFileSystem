@@ -61,16 +61,15 @@ namespace DataLayer
             }
         }
 
-        public async Task UpdateAsync(string key)
+        public async Task UpdateAsync(Author author)
+
         {
             try
             {
-                Author? author = await _context.Authors.FindAsync(key);
-                if (author != null)
-                {
-                    _context.Authors.Update(author);
-                    await _context.SaveChangesAsync();
-                }
+
+                _context.Authors.Update(author);
+                await _context.SaveChangesAsync();
+
             }
             catch (Exception ex)
             {
@@ -78,19 +77,20 @@ namespace DataLayer
                 throw new Exception(ex.Message);
             }
         }
-        public async Task UpdateAsync(Author item)
-        {
-            try
-            {
-                    _context.Authors.Update(item);
-                    await _context.SaveChangesAsync();
-            }
-            catch (Exception ex)
-            {
 
-                throw new Exception(ex.Message);
-            }
-        }
+        // public async Task UpdateAsync(Author item)
+        //  {
+        //      try
+        //     {
+        //              _context.Authors.Update(item);
+        //              await _context.SaveChangesAsync();
+        ////      }
+        //       catch (Exception ex)
+        //      {
+
+        //          throw new Exception(ex.Message);
+        //     }
+        //  }
 
         public async Task DeleteAsync(string key)
         {

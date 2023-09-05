@@ -26,8 +26,9 @@ namespace BussinessLayer
         public int Year { get; set; }
         public List<Author> Authors { get; set; }
         public string Copyright { get; set; }
-        private Video()
+        public Video()
         {
+            VideoId = Guid.NewGuid().ToString();
             Authors = new List<Author>();
             Tags = new List<Tag>();
             Genres = new List<Genre>();

@@ -14,8 +14,9 @@ namespace BussinessLayer
         [Required]
         public string Content { get; set; }
         public List<Video> Videos { get; set; }
-        private Genre()
+        public Genre()
         {
+            GenreId = Guid.NewGuid().ToString();
             Videos = new();
         }
         public Genre(string genreId, string content) : this()

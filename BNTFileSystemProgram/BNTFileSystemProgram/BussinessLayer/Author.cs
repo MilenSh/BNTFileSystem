@@ -14,10 +14,12 @@ namespace BussinessLayer
         [Required]
         public string AuthorName { get; set; }
         public List<Video> Videos { get; set; }
-        private Author()
+        public Author()
         {
+            AuthorId = Guid.NewGuid().ToString();
             Videos = new();
         }
+        
         public Author(string authorId, string authorName) : this()
         {
             AuthorId = authorId;

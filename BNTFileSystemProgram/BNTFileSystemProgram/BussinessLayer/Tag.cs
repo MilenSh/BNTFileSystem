@@ -9,8 +9,9 @@ namespace BussinessLayer
         [Required]
         public string Content { get; set; }
         public List<Video> Videos { get; set; }
-        private Tag()
+        public Tag()
         {
+            TagId = Guid.NewGuid().ToString();
             Videos = new();
         }
         public Tag(string tagId, string content) : this()

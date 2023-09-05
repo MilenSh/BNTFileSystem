@@ -14,8 +14,9 @@ namespace BussinessLayer
         [Required]
         public string Extension { get; set; }
         public List<Video> Videos { get; set; }
-        private Format()
+        public Format()
         {
+            FormatId = Guid.NewGuid().ToString();
             Videos = new();
         }
         public Format(string formatId, string extension) : this()

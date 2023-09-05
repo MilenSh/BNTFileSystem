@@ -12,10 +12,10 @@ namespace BNTFileSystemProgram.Controllers
 {
     public class AuthorsController : Controller
     {
-        private readonly AuthorContext context;
+        private readonly IDb<Author, string> context;
         private readonly ApplicationDbContext applicationDbContext;
 
-        public AuthorsController(ApplicationDbContext applicationDbContext, AuthorContext context)
+        public AuthorsController(ApplicationDbContext applicationDbContext, IDb<Author, string>  context)
         {
             this.applicationDbContext = applicationDbContext;
             this.context = context;
@@ -74,7 +74,12 @@ namespace BNTFileSystemProgram.Controllers
                 return NotFound();
             }
 
-            await context.UpdateAsync(id);
+            //await context.UpdateAsync(id);
+
+
+            Author author = await context.ReadAsync(id);
+            if(author == null) { return NotFound(); }
+            return View(author);
 
             return View();
         }

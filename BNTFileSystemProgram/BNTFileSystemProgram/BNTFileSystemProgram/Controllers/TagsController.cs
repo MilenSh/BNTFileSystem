@@ -13,9 +13,9 @@ namespace BNTFileSystemProgram.Controllers
     public class TagsController : Controller
     {
         private readonly ApplicationDbContext applicationDbContext;
-        private readonly TagContext context;
+        private readonly IDb<Tag, string> context;
 
-        public TagsController(ApplicationDbContext applicationDbContext, TagContext context)
+        public TagsController(ApplicationDbContext applicationDbContext, IDb<Tag, string> context)
         {
             this.context = context;
             this.applicationDbContext = applicationDbContext;
@@ -74,7 +74,11 @@ namespace BNTFileSystemProgram.Controllers
                 return NotFound();
             }
 
-            await context.UpdateAsync(id);
+            Tag tag = await context.ReadAsync(id);
+            if (tag == null) { return NotFound(); }
+            return View(tag);
+
+            //await context.UpdateAsync(id);
 
             return View();
         }

@@ -14,7 +14,7 @@ namespace DataLayer
 
         Task<IEnumerable<T>> ReadAllAsync();
 
-        Task UpdateAsync(K key);
+        Task UpdateAsync(T item);
 
         Task DeleteAsync(K key);
     }

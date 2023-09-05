@@ -13,9 +13,9 @@ namespace BNTFileSystemProgram.Controllers
     public class VideosController : Controller
     {
         private readonly ApplicationDbContext applicationDbContext;
-        private readonly VideoContext context;
+        private readonly IDb<Video, string> context;
 
-        public VideosController(ApplicationDbContext applicationDbContext, VideoContext context)
+        public VideosController(ApplicationDbContext applicationDbContext, IDb<Video, string> context)
         {
             this.context = context;
             this.applicationDbContext = applicationDbContext;
@@ -78,7 +78,11 @@ namespace BNTFileSystemProgram.Controllers
                 return NotFound();
             }
 
-            await context.UpdateAsync(id);
+            Video video = await context.ReadAsync(id);
+            if (video == null) { return NotFound(); }
+            return View(video);
+
+            //await context.UpdateAsync(id);
 
             //ViewData["FormatId"] = new SelectList(_context.Formats, "FormatId", "FormatId", video.FormatId);
             //^^^ И тук ^^^

@@ -13,9 +13,9 @@ namespace BNTFileSystemProgram.Controllers
     public class GenresController : Controller
     {
         private readonly ApplicationDbContext applicationDbContext;
-        private readonly GenreContext context;
+        private readonly IDb<Genre, string> context;
 
-        public GenresController(ApplicationDbContext applicationDbContext, GenreContext context)
+        public GenresController(ApplicationDbContext applicationDbContext, IDb<Genre, string> context)
         {
             this.applicationDbContext = applicationDbContext;
             this.context = context;
@@ -74,7 +74,11 @@ namespace BNTFileSystemProgram.Controllers
                 return NotFound();
             }
 
-            await context.UpdateAsync(id);
+            Genre genre = await context.ReadAsync(id);
+            if (genre == null) { return NotFound(); }
+            return View(genre);
+
+            //await context.UpdateAsync(id);
 
             return View();
         }

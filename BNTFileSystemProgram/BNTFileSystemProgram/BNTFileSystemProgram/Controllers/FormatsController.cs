@@ -13,9 +13,9 @@ namespace BNTFileSystemProgram.Controllers
     public class FormatsController : Controller
     {
         private readonly ApplicationDbContext applicationDbContext;
-        private readonly FormatContext context;
+        private readonly IDb<Format, string> context;
 
-        public FormatsController(ApplicationDbContext applicationDbContext, FormatContext context)
+        public FormatsController(ApplicationDbContext applicationDbContext, IDb<Format, string> context)
         {
             this.applicationDbContext = applicationDbContext;
             this.context = context;
@@ -73,7 +73,11 @@ namespace BNTFileSystemProgram.Controllers
                 return NotFound();
             }
 
-            await context.UpdateAsync(id);
+            //await context.UpdateAsync(id);
+
+            Format format = await context.ReadAsync(id);
+            if (format == null) { return NotFound(); }
+            return View(format);
 
             return View();
         }
