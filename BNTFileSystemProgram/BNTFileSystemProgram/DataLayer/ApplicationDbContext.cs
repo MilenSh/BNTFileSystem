@@ -56,5 +56,9 @@ namespace DataLayer
         public DbSet<Tag> Tags { get; set; }
 
         public DbSet<Genre> Genres { get; set; }
+
+        public DbSet<BusinessLayer.User> Users { get; set; }
+
+        
     }
 }
