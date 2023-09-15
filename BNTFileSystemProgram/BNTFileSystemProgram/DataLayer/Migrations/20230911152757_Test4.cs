@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace DataLayer.Migrations
 {
-    public partial class Test1 : Migration
+    public partial class Test4 : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -28,6 +28,10 @@ namespace DataLayer.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Discriminator = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FirstName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    LastName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Role = table.Column<int>(type: "int", nullable: true),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -302,17 +306,17 @@ namespace DataLayer.Migrations
             migrationBuilder.InsertData(
                 table: "AspNetRoles",
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
-                values: new object[] { "6250be3b-40c6-44e6-b2b0-49e2b81b6459", "40604b8c-5fb7-43b0-8856-9220dc0e4316", "Admin", "ADMIN" });
+                values: new object[] { "887e5b21-6a5d-4dd3-a069-1ec895ba4297", "624527ed-f978-4dd9-a34f-58a92b522537", "User", "USER" });
 
             migrationBuilder.InsertData(
                 table: "AspNetRoles",
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
-                values: new object[] { "c1a52923-5145-45ab-84ec-9be35b53e480", "65c25226-2a8f-47db-9a16-542cb6e96409", "User", "USER" });
+                values: new object[] { "d250da13-1c78-4886-8a60-7e7a90eb66ed", "82dd586d-39fe-48c4-a161-11c0bc91cbeb", "Admin", "ADMIN" });
 
             migrationBuilder.InsertData(
                 table: "AspNetRoles",
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
-                values: new object[] { "db58214d-9670-46d3-b376-4322485516bd", "51f982fc-a079-4c77-bfed-003f710fca7d", "Editor", "EDITOR" });
+                values: new object[] { "de33cd0c-a447-4bb9-9b58-0d38ce8b8d6a", "026cd129-a5df-4f3e-a5e9-7968c3383ddb", "Editor", "EDITOR" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",

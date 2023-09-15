@@ -1,20 +1,25 @@
-﻿using BNTFileSystemProgram.Models;
+﻿using System.Diagnostics;
+using DataLayer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
+using BNTFileSystemProgram.Models;
 
 namespace BNTFileSystemProgram.Controllers
 {
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private readonly IdentityContext _identityContext;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger, IdentityContext identityContext)
         {
             _logger = logger;
+            _identityContext = identityContext;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
+            await _identityContext.SeedDataAsync("administrator", "admin123");
             return View();
         }
 

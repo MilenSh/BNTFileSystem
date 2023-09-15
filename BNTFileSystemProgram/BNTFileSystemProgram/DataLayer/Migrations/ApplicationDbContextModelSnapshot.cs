@@ -179,22 +179,22 @@ namespace DataLayer.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "6250be3b-40c6-44e6-b2b0-49e2b81b6459",
-                            ConcurrencyStamp = "40604b8c-5fb7-43b0-8856-9220dc0e4316",
+                            Id = "d250da13-1c78-4886-8a60-7e7a90eb66ed",
+                            ConcurrencyStamp = "82dd586d-39fe-48c4-a161-11c0bc91cbeb",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "db58214d-9670-46d3-b376-4322485516bd",
-                            ConcurrencyStamp = "51f982fc-a079-4c77-bfed-003f710fca7d",
+                            Id = "de33cd0c-a447-4bb9-9b58-0d38ce8b8d6a",
+                            ConcurrencyStamp = "026cd129-a5df-4f3e-a5e9-7968c3383ddb",
                             Name = "Editor",
                             NormalizedName = "EDITOR"
                         },
                         new
                         {
-                            Id = "c1a52923-5145-45ab-84ec-9be35b53e480",
-                            ConcurrencyStamp = "65c25226-2a8f-47db-9a16-542cb6e96409",
+                            Id = "887e5b21-6a5d-4dd3-a069-1ec895ba4297",
+                            ConcurrencyStamp = "624527ed-f978-4dd9-a34f-58a92b522537",
                             Name = "User",
                             NormalizedName = "USER"
                         });
@@ -235,6 +235,10 @@ namespace DataLayer.Migrations
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Email")
@@ -288,6 +292,8 @@ namespace DataLayer.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
+
+                    b.HasDiscriminator<string>("Discriminator").HasValue("IdentityUser");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
@@ -384,6 +390,24 @@ namespace DataLayer.Migrations
                     b.HasIndex("VideosVideoId");
 
                     b.ToTable("TagVideo");
+                });
+
+            modelBuilder.Entity("BusinessLayer.User", b =>
+                {
+                    b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUser");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Role")
+                        .HasColumnType("int");
+
+                    b.HasDiscriminator().HasValue("User");
                 });
 
             modelBuilder.Entity("AuthorVideo", b =>

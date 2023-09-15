@@ -146,7 +146,32 @@ namespace DataLayer
             }
         }
 
-        //TODO: Add pdateUserAsync
+        public async Task UpdateUserAsync(string username, string firstName, string lastname, Role role)
+        {
+            try
+            {
+                var user = await FindUserByNameAsync(username);
+
+                if (user == null)
+                {
+                    throw new InvalidOperationException("User not found!");
+                }
+
+                user.UserName = username;
+                user.FirstName = firstName;
+                user.LastName = lastname;
+                
+
+                await _userManager.RemoveFromRoleAsync(user, user.Role.ToString());
+                user.Role = role;
+                await _userManager.AddToRoleAsync(user, user.Role.ToString());
+                await _userManager.UpdateAsync(user);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
 
         public async Task ChangeUserPasswordAsync(User user, string currentPassword, string newPassword)
         {

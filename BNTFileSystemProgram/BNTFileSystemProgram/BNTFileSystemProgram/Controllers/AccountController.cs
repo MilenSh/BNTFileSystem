@@ -32,6 +32,11 @@ namespace BNTFileSystemProgram.Controllers
             _signInManager = signInManager;
         }
 
+        public async Task<IActionResult> Login()
+        {
+            return View();
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login([Bind("Username,Password,RememberMe")] LoginViewModel loginViewModel)
