@@ -7,35 +7,34 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using BussinessLayer;
 using DataLayer;
+using ServiceLayer;
 
 namespace BNTFileSystemProgram.Controllers
 {
     public class GenresController : Controller
     {
-        private readonly ApplicationDbContext applicationDbContext;
-        private readonly IDb<Genre, string> context;
+        private readonly GenreManager genreManager;
 
-        public GenresController(ApplicationDbContext applicationDbContext, IDb<Genre, string> context)
+        public GenresController(GenreManager genreManager)
         {
-            this.applicationDbContext = applicationDbContext;
-            this.context = context;
+            this.genreManager = genreManager;
         }
 
         // GET: Genres
         public async Task<IActionResult> Index()
         {
-            return View(await context.ReadAllAsync());
+            return View(await genreManager.ReadAllAsync());
         }
 
         // GET: Genres/Details/5
         public async Task<IActionResult> Details(string id)
         {
-            if (id == null || applicationDbContext.Genres == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            var genre = await context.ReadAsync(id);
+            var genre = await genreManager.ReadAsync(id);
 
             if (genre == null)
             {
@@ -60,7 +59,7 @@ namespace BNTFileSystemProgram.Controllers
         {
             if (ModelState.IsValid)
             {
-                await context.CreateAsync(genre);
+                await genreManager.CreateAsync(genre);
                 return RedirectToAction(nameof(Index));
             }
             return View(genre);
@@ -69,12 +68,12 @@ namespace BNTFileSystemProgram.Controllers
         // GET: Genres/Edit/5
         public async Task<IActionResult> Edit(string id)
         {
-            if (id == null || applicationDbContext.Genres == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            Genre genre = await context.ReadAsync(id);
+            Genre genre = await genreManager.ReadAsync(id);
             if (genre == null) { return NotFound(); }
             return View(genre);
 
@@ -99,11 +98,11 @@ namespace BNTFileSystemProgram.Controllers
             {
                 try
                 {
-                    await context.UpdateAsync(genre);
+                    await genreManager.UpdateAsync(genre);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!GenreExists(genre.GenreId))
+                    if (!await GenreExists(genre.GenreId))
                     {
                         return NotFound();
                     }
@@ -120,12 +119,12 @@ namespace BNTFileSystemProgram.Controllers
         // GET: Genres/Delete/5
         public async Task<IActionResult> Delete(string id)
         {
-            if (id == null || applicationDbContext.Genres == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            await context.DeleteAsync(id);
+            await genreManager.DeleteAsync(id);
 
             return View();
         }
@@ -135,17 +134,13 @@ namespace BNTFileSystemProgram.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
-            if (applicationDbContext.Genres == null)
-            {
-                return Problem("Entity set 'ApplicationDbContext.Genres'  is null.");
-            }
-            await context.DeleteAsync(id);
+            await genreManager.DeleteAsync(id);
             return RedirectToAction(nameof(Index));
         }
 
-        private bool GenreExists(string id)
+        private async Task<bool> GenreExists(string id)
         {
-          return (applicationDbContext.Genres?.Any(e => e.GenreId == id)).GetValueOrDefault();
+            return await genreManager.ReadAsync(id) is not null;
         }
     }
 }

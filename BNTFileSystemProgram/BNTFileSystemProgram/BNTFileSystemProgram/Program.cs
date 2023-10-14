@@ -4,8 +4,7 @@ using DataLayer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
 using Microsoft.EntityFrameworkCore;
-
-
+using ServiceLayer;
 
 public class Program
     {
@@ -15,13 +14,24 @@ public class Program
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
-            builder.Services.AddDbContext<ApplicationDbContext>();
-            builder.Services.AddScoped<IDb<Author, string>, AuthorContext>();
-            builder.Services.AddScoped<IDb<Format, string>, FormatContext>();
-            builder.Services.AddScoped<IDb<Genre, string>, GenreContext>();
-            builder.Services.AddScoped<IDb<Tag, string>, TagContext>();
-            builder.Services.AddScoped<IDb<Video, string>, VideoContext>();
-            builder.Services.AddScoped<IdentityContext>();
+        builder.Services.AddDbContext<ApplicationDbContext>();
+
+            builder.Services.AddScoped<AuthorContext, AuthorContext>();
+            builder.Services.AddScoped<AuthorManager, AuthorManager>();
+
+            builder.Services.AddScoped<FormatContext, FormatContext>();
+            builder.Services.AddScoped<FormatManager, FormatManager>();
+
+            builder.Services.AddScoped<GenreContext, GenreContext>();
+            builder.Services.AddScoped<GenreManager, GenreManager>();
+
+            builder.Services.AddScoped<TagContext, TagContext>();
+            builder.Services.AddScoped<TagManager, TagManager>();
+
+            builder.Services.AddScoped<VideoContext, VideoContext>();
+            builder.Services.AddScoped<VideoManager, VideoManager>();
+
+        builder.Services.AddScoped<IdentityContext>();
 
         builder.Services.AddControllersWithViews();
 

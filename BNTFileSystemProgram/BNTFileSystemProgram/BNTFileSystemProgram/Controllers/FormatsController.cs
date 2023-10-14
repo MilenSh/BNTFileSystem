@@ -6,36 +6,34 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using BussinessLayer;
-using DataLayer;
+using ServiceLayer;
 
 namespace BNTFileSystemProgram.Controllers
 {
     public class FormatsController : Controller
     {
-        private readonly ApplicationDbContext applicationDbContext;
-        private readonly IDb<Format, string> context;
+        private readonly FormatManager formatManager;
 
-        public FormatsController(ApplicationDbContext applicationDbContext, IDb<Format, string> context)
+        public FormatsController(FormatManager formatManager)
         {
-            this.applicationDbContext = applicationDbContext;
-            this.context = context;
+            this.formatManager = formatManager;
         }
 
         // GET: Formats
         public async Task<IActionResult> Index()
         {
-            return View(await context.ReadAllAsync());
+            return View(await formatManager.ReadAllAsync());
         }
 
         // GET: Formats/Details/5
         public async Task<IActionResult> Details(string id)
         {
-            if (id == null || applicationDbContext.Formats == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            var format = await context.ReadAsync(id);
+            var format = await formatManager.ReadAsync(id);
             if (format == null)
             {
                 return NotFound();
@@ -59,7 +57,7 @@ namespace BNTFileSystemProgram.Controllers
         {
             if (ModelState.IsValid)
             {
-                await context.CreateAsync(format);
+                await formatManager.CreateAsync(format);
                 return RedirectToAction(nameof(Index));
             }
             return View(format);
@@ -68,14 +66,12 @@ namespace BNTFileSystemProgram.Controllers
         // GET: Formats/Edit/5
         public async Task<IActionResult> Edit(string id)
         {
-            if (id == null || applicationDbContext.Formats == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            //await context.UpdateAsync(id);
-
-            Format format = await context.ReadAsync(id);
+            Format format = await formatManager.ReadAsync(id);
             if (format == null) { return NotFound(); }
             return View(format);
 
@@ -98,11 +94,11 @@ namespace BNTFileSystemProgram.Controllers
             {
                 try
                 {
-                    await context.UpdateAsync(format);
+                    await formatManager.UpdateAsync(format);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!FormatExists(format.FormatId))
+                    if (!await FormatExists(format.FormatId))
                     {
                         return NotFound();
                     }
@@ -119,14 +115,19 @@ namespace BNTFileSystemProgram.Controllers
         // GET: Formats/Delete/5
         public async Task<IActionResult> Delete(string id)
         {
-            if (id == null || applicationDbContext.Formats == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            await context.DeleteAsync(id);
+            Format formatFromDb = await formatManager.ReadAsync(id, false, true);
 
-            return View();
+            if(formatFromDb == null)
+            {
+                return NotFound();
+            }
+
+            return View(formatFromDb);
         }
 
         // POST: Formats/Delete/5
@@ -134,17 +135,13 @@ namespace BNTFileSystemProgram.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
-            if (applicationDbContext.Formats == null)
-            {
-                return Problem("Entity set 'ApplicationDbContext.Formats'  is null.");
-            }
-            await context.DeleteAsync(id);
+            await formatManager.DeleteAsync(id);
             return RedirectToAction(nameof(Index));
         }
 
-        private bool FormatExists(string id)
+        private async Task<bool> FormatExists(string id)
         {
-          return (applicationDbContext.Formats?.Any(e => e.FormatId == id)).GetValueOrDefault();
+          return await formatManager.ReadAsync(id) is not null;
         }
     }
 }

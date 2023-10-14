@@ -12,7 +12,7 @@ namespace BussinessLayer
         [Required]
         public string Title { get; set; }
         [Required]
-        public string Location { get; set; }
+        public string? Location { get; set; }
 
         [ForeignKey("FormatId")]
         public string FormatId { get; set; }

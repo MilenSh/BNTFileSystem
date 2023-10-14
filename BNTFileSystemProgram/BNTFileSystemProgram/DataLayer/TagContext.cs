@@ -1,5 +1,6 @@
 ﻿using BussinessLayer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,19 +11,19 @@ namespace DataLayer
 {
     public class TagContext : IDb<Tag, string>
     {
-        private readonly ApplicationDbContext _context;
+        private readonly ApplicationDbContext dbContext;
 
         public TagContext(ApplicationDbContext context)
         {
-            _context = context;
+            dbContext = context;
         }
 
         public async Task CreateAsync(Tag item)
         {
             try
             {
-                _context.Tags.Add(item);
-                await _context.SaveChangesAsync();
+                dbContext.Tags.Add(item);
+                await dbContext.SaveChangesAsync();
             }
             catch (Exception ex)
             {
@@ -31,59 +32,86 @@ namespace DataLayer
             }
         }
 
-        public async Task<Tag> ReadAsync(string key)
+        public async Task<Tag> ReadAsync(string key, bool useNavigationalProperties = false, bool isReadOnly = true)
         {
             try
             {
-                return await _context.Tags.
-                    Include(v => v.Videos).
-                    SingleAsync(t => t.TagId == key);
-            }
-            catch (Exception ex)
-            {
+                IQueryable<Tag> query = dbContext.Tags;
 
-                throw new Exception(ex.Message);
-            }
-        }
-
-        public async Task<IEnumerable<Tag>> ReadAllAsync()
-        {
-            try
-            {
-                return await _context.Tags.
-                    Include(v => v.Videos).
-                    ToListAsync();
-            }
-            catch (Exception ex)
-            {
-
-                throw new Exception(ex.Message);
-            }
-        }
-
-        public async Task UpdateAsync(Tag item)
-        {
-            try
-            {
-                _context.Tags.Update(item);
-                await _context.SaveChangesAsync();
-            }
-            catch (Exception ex)
-            {
-
-                throw new Exception(ex.Message);
-            }
-        }
-        public async Task UpdateAsync(string key)
-        {
-            try
-            {
-                Tag? tag = await _context.Tags.FindAsync(key);
-                if(tag != null)
+                if (useNavigationalProperties)
                 {
-                    _context.Tags.Update(tag);
-                    await _context.SaveChangesAsync();
+                    query = query.Include(t => t.Videos);
                 }
+
+                if (isReadOnly)
+                {
+                    query = query.AsNoTrackingWithIdentityResolution();
+                }
+
+                return await query.FirstOrDefaultAsync(t => t.TagId == key);
+            }
+            catch (Exception ex)
+            {
+
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<IEnumerable<Tag>> ReadAllAsync(bool useNavigationalProperties = false, bool isReadOnly = true)
+        {
+            try
+            {
+                IQueryable<Tag> query = dbContext.Tags;
+
+                if (useNavigationalProperties)
+                {
+                    query = query.Include(t => t.Videos);
+                }
+
+                if (isReadOnly)
+                {
+                    query = query.AsNoTrackingWithIdentityResolution();
+                }
+
+                return await query.ToListAsync();
+            }
+            catch (Exception ex)
+            {
+
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task UpdateAsync(Tag item, bool useNavigationalProperties = false)
+        {
+            try
+            {
+                Tag tagFromDb = await ReadAsync(item.TagId, useNavigationalProperties, false);
+
+                tagFromDb.Content = item.Content;
+
+                if (useNavigationalProperties)
+                {
+                    List<Video> videos = new List<Video>();
+
+                    foreach (Video video in item.Videos)
+                    {
+                        Video videoFromDb = await dbContext.Videos.FindAsync(video.VideoId);
+
+                        if (videoFromDb != null)
+                        {
+                            videos.Add(videoFromDb);
+                        }
+                        else
+                        {
+                            videos.Add(video);
+                        }
+                    }
+
+                    tagFromDb.Videos = videos;
+                }
+
+                await dbContext.SaveChangesAsync();
             }
             catch (Exception ex)
             {
@@ -96,12 +124,15 @@ namespace DataLayer
         {
             try
             {
-                var tagFromDb = await _context.Tags.FindAsync(key);
-                if (tagFromDb != null)
+                var tagFromDb = await ReadAsync(key, false, false);
+
+                if (tagFromDb == null)
                 {
-                    _context.Tags.Remove(tagFromDb);
-                    await _context.SaveChangesAsync();
+                    throw new ArgumentException("The tag with this Id does not exist");
                 }
+
+                dbContext.Tags.Remove(tagFromDb);
+                await dbContext.SaveChangesAsync();
             }
             catch (Exception ex)
             {

@@ -6,36 +6,34 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using BussinessLayer;
-using DataLayer;
+using ServiceLayer;
 
 namespace BNTFileSystemProgram.Controllers
 {
     public class TagsController : Controller
     {
-        private readonly ApplicationDbContext applicationDbContext;
-        private readonly IDb<Tag, string> context;
+        private readonly TagManager tagManager;
 
-        public TagsController(ApplicationDbContext applicationDbContext, IDb<Tag, string> context)
+        public TagsController(TagManager tagManager)
         {
-            this.context = context;
-            this.applicationDbContext = applicationDbContext;
+            this.tagManager = tagManager;
         }
 
         // GET: Tags
         public async Task<IActionResult> Index()
         {
-            return View(await context.ReadAllAsync());
+            return View(await tagManager.ReadAllAsync());
         }
 
         // GET: Tags/Details/5
         public async Task<IActionResult> Details(string id)
         {
-            if (id == null ||applicationDbContext.Tags == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            var tag = await context.ReadAsync(id);
+            var tag = await tagManager.ReadAsync(id);
 
             if (tag == null)
             {
@@ -60,7 +58,7 @@ namespace BNTFileSystemProgram.Controllers
         {
             if (ModelState.IsValid)
             {
-                await context.CreateAsync(tag);
+                await tagManager.CreateAsync(tag);
                 return RedirectToAction(nameof(Index));
             }
             return View(tag);
@@ -69,12 +67,12 @@ namespace BNTFileSystemProgram.Controllers
         // GET: Tags/Edit/5
         public async Task<IActionResult> Edit(string id)
         {
-            if (id == null || applicationDbContext.Tags == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            Tag tag = await context.ReadAsync(id);
+            Tag tag = await tagManager.ReadAsync(id);
             if (tag == null) { return NotFound(); }
             return View(tag);
 
@@ -99,11 +97,11 @@ namespace BNTFileSystemProgram.Controllers
             {
                 try
                 {
-                    await context.UpdateAsync(tag);
+                    await tagManager.UpdateAsync(tag);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!TagExists(tag.TagId))
+                    if (!await TagExists(tag.TagId))
                     {
                         return NotFound();
                     }
@@ -120,12 +118,12 @@ namespace BNTFileSystemProgram.Controllers
         // GET: Tags/Delete/5
         public async Task<IActionResult> Delete(string id)
         {
-            if (id == null || applicationDbContext.Tags == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            await context.DeleteAsync(id);
+            await tagManager.DeleteAsync(id);
 
             return View();
         }
@@ -135,19 +133,14 @@ namespace BNTFileSystemProgram.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
-            if (applicationDbContext.Tags == null)
-            {
-                return Problem("Entity set 'ApplicationDbContext.Tags'  is null.");
-            }
-
-            await context.DeleteAsync(id);
+            await tagManager.DeleteAsync(id);
             
             return RedirectToAction(nameof(Index));
         }
 
-        private bool TagExists(string id)
+        private async Task<bool> TagExists(string id)
         {
-          return (applicationDbContext.Tags?.Any(e => e.TagId == id)).GetValueOrDefault();
+          return await tagManager.ReadAsync(id) is not null;
         }
     }
 }

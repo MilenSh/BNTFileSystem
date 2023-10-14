@@ -1,5 +1,6 @@
 ﻿using BussinessLayer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,19 +11,19 @@ namespace DataLayer
 {
     public class FormatContext : IDb<Format, string>
     {
-        private readonly ApplicationDbContext _context;
+        private readonly ApplicationDbContext dbContext;
 
         public FormatContext(ApplicationDbContext context)
         {
-            _context = context;
+            dbContext = context;
         }
 
         public async Task CreateAsync(Format item)
         {
             try
             {
-                _context.Formats.Add(item);
-                await _context.SaveChangesAsync();
+                dbContext.Formats.Add(item);
+                await dbContext.SaveChangesAsync();
             }
             catch (Exception ex)
             {
@@ -31,58 +32,86 @@ namespace DataLayer
             }
         }
 
-        public async Task<Format> ReadAsync(string key)
+        public async Task<Format> ReadAsync(string key, bool useNavigationalOptions = false, bool isReadOnly = true)
         {
             try
             {
-                return await _context.Formats.
-                    Include(v => v.Videos).
-                    SingleAsync(f => f.FormatId == key);
-            }
-            catch (Exception ex)
-            {
+                IQueryable<Format> query = dbContext.Formats;
 
-                throw new Exception(ex.Message);
-            }
-        }
-
-        public async Task<IEnumerable<Format>> ReadAllAsync()
-        {
-            try
-            {
-                return await _context.Formats.
-                    Include(v => v.Videos).
-                    ToListAsync();
-            }
-            catch (Exception ex)
-            {
-
-                throw new Exception(ex.Message);
-            }
-        }
-
-        public async Task UpdateAsync(Format item)
-        {
-            try
-            {
-                _context.Formats.Update(item);
-                await _context.SaveChangesAsync();
-            }
-            catch (Exception ex)
-            {
-
-                throw new Exception(ex.Message);
-            }
-        }
-        public async Task UpdateAsync(string key)
-        {
-            try
-            {
-                Format? format = await _context.Formats.FindAsync(key);
-                if (format != null)
+                if (useNavigationalOptions)
                 {
-                    _context.Formats.Update(format);
-                    await _context.SaveChangesAsync();
+                    query.Include(f => f.Videos);
+                }
+
+                if (isReadOnly)
+                {
+                    query = query.AsNoTrackingWithIdentityResolution();
+                }
+
+                return await query.FirstOrDefaultAsync(f => f.FormatId == key);
+            }
+            catch (Exception ex)
+            {
+
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<IEnumerable<Format>> ReadAllAsync(bool useNavigationalOptions = false, bool isReadOnly = true)
+        {
+            try
+            {
+                IQueryable<Format> query = dbContext.Formats;
+
+                if (useNavigationalOptions)
+                {
+                    query.Include(f => f.Videos);
+                }
+
+                if (isReadOnly)
+                {
+                    query = query.AsNoTrackingWithIdentityResolution();
+                }
+
+                return await query.ToListAsync();
+            }
+            catch (Exception ex)
+            {
+
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task UpdateAsync(Format item, bool useNavigationalOptions = false)
+        {
+            try
+            {
+                Format formatFromDb = await ReadAsync(item.FormatId, useNavigationalOptions, false);
+
+                if(formatFromDb == null) { await CreateAsync(item); }
+
+                formatFromDb.Extension = item.Extension;
+
+                if (useNavigationalOptions)
+                {
+                    List<Video> videos = new List<Video>(item.Videos.Count);
+
+                    foreach(Video video in item.Videos)
+                    {
+                        Video? videoFromDb = await dbContext.Videos.FindAsync(video.VideoId);
+
+                        if(videoFromDb != null)
+                        {
+                            videos.Add(videoFromDb);
+                        } 
+                        else
+                        {
+                            videos.Add(video);
+                        }
+                    }
+
+                    formatFromDb.Videos = videos;
+
                 }
             }
             catch (Exception ex)
@@ -96,12 +125,15 @@ namespace DataLayer
         {
             try
             {
-                var formatFromDb = await _context.Formats.FindAsync(key);
-                if(formatFromDb != null)
+                var formatFromDb = await ReadAsync(key, false, false);
+
+                if(formatFromDb == null)
                 {
-                    _context.Formats.Remove(formatFromDb);
-                    await _context.SaveChangesAsync();
+                    throw new ArgumentException("The format with this Id does not exist");
                 }
+
+                dbContext.Formats.Remove(formatFromDb);
+                await dbContext.SaveChangesAsync();
             }
             catch (Exception ex)
             {

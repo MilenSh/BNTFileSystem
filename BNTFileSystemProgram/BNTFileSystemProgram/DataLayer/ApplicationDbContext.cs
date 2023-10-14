@@ -29,7 +29,7 @@ namespace DataLayer
             if (!optionsBuilder.IsConfigured)
             {
 
-                optionsBuilder.UseSqlServer(@"Server=IVAN-VIPER\SQLEXPRESS; Database=TESTBNT;Trusted_Connection=True;");
+                optionsBuilder.UseSqlServer(@"Server=localhost\SQLEXPRESS; Database=TESTBNT;Trusted_Connection=True;");
             }
             base.OnConfiguring(optionsBuilder);
         }

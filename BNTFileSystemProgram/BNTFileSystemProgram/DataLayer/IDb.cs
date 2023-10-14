@@ -10,11 +10,11 @@ namespace DataLayer
     {
         Task CreateAsync(T item);
 
-        Task<T> ReadAsync(K key);
+        Task<T> ReadAsync(K key, bool useNavigationalProperties, bool isReadOnly);
 
-        Task<IEnumerable<T>> ReadAllAsync();
+        Task<IEnumerable<T>> ReadAllAsync(bool useNavigationalProperties, bool isReadOnly);
 
-        Task UpdateAsync(T item);
+        Task UpdateAsync(T item, bool isReadOnly);
 
         Task DeleteAsync(K key);
     }

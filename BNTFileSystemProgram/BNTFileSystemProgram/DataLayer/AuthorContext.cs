@@ -1,5 +1,6 @@
 ﻿using BussinessLayer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,19 +11,19 @@ namespace DataLayer
 {
     public class AuthorContext : IDb<Author, string>
     {
-        private readonly ApplicationDbContext _context;
+        private readonly ApplicationDbContext dbContext;
 
         public AuthorContext(ApplicationDbContext context)
         {
-            _context = context;
+            dbContext = context;
         }
 
         public async Task CreateAsync(Author item)
         {
             try
             {
-                _context.Authors.Add(item);
-                await _context.SaveChangesAsync();
+                dbContext.Authors.Add(item);
+                await dbContext.SaveChangesAsync();
             }
             catch (Exception ex)
             {
@@ -31,45 +32,88 @@ namespace DataLayer
             }
         }
 
-        public async Task<Author> ReadAsync(string key)
+        public async Task<Author> ReadAsync(string key, bool useNavigationalProperties = false, bool isReadOnly = true)
+        {
+
+            try
+            {
+                IQueryable<Author> query = dbContext.Authors;
+
+                if (useNavigationalProperties)
+                {
+                    query = query.Include(a => a.Videos);
+                }
+
+                if (isReadOnly)
+                {
+                    query = query.AsNoTrackingWithIdentityResolution();
+                }
+
+                return await query.FirstOrDefaultAsync(a => a.AuthorId == key);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<IEnumerable<Author>> ReadAllAsync(bool useNavigationalProperties = false, bool isReadOnly = true)
         {
             try
             {
-                return await _context.Authors.
-                    Include(v => v.Videos).
-                    SingleAsync(a => a.AuthorId == key);
+                IQueryable<Author> query = dbContext.Authors;
+
+                if (useNavigationalProperties)
+                {
+                    query = query.Include(a => a.Videos);
+                }
+
+                if (isReadOnly)
+                {
+                    query = query.AsNoTrackingWithIdentityResolution();
+                }
+
+                return await query.ToListAsync();
             }
             catch (Exception ex)
             {
-
                 throw new Exception(ex.Message);
             }
         }
 
-        public async Task<IEnumerable<Author>> ReadAllAsync()
-        {
-            try
-            {
-                return await _context.Authors.
-                    Include(v => v.Videos).
-                    ToListAsync();
-            }
-            catch (Exception ex)
-            {
-
-                throw new Exception(ex.Message);
-            }
-        }
-
-        public async Task UpdateAsync(Author author)
+        public async Task UpdateAsync(Author item, bool useNavigationalProperties = false)
 
         {
             try
             {
+                Author authorFromDb = await ReadAsync(item.AuthorId, useNavigationalProperties, false);
 
-                _context.Authors.Update(author);
-                await _context.SaveChangesAsync();
+                if (authorFromDb == null) { await CreateAsync(item); }
 
+                authorFromDb.AuthorName = item.AuthorName;
+
+                if (useNavigationalProperties)
+                {
+                    List<Video> videos = new List<Video>(item.Videos.Count);
+
+                    foreach (var video in item.Videos)
+                    {
+                        Video? videoFromDb = await dbContext.Videos.FindAsync(video.VideoId);
+
+                        if (videoFromDb is null)
+                        {
+                            videos.Add(video);
+                        }
+                        else
+                        {
+                            videos.Add(videoFromDb);
+                        }
+                    }
+
+                    authorFromDb.Videos = videos;
+                }
+
+                await dbContext.SaveChangesAsync();
             }
             catch (Exception ex)
             {
@@ -77,31 +121,21 @@ namespace DataLayer
                 throw new Exception(ex.Message);
             }
         }
-
-        // public async Task UpdateAsync(Author item)
-        //  {
-        //      try
-        //     {
-        //              _context.Authors.Update(item);
-        //              await _context.SaveChangesAsync();
-        ////      }
-        //       catch (Exception ex)
-        //      {
-
-        //          throw new Exception(ex.Message);
-        //     }
-        //  }
 
         public async Task DeleteAsync(string key)
         {
             try
             {
-                var authorFromDb = await _context.Authors.FindAsync(key);
-                if (authorFromDb != null)
+                Author authorFromDb = await ReadAsync(key, false, false);
+
+                if (authorFromDb == null)
                 {
-                    _context.Authors.Remove(authorFromDb);
-                    await _context.SaveChangesAsync();
+                    throw new ArgumentException("Author with this Id does not exist");
                 }
+
+                dbContext.Authors.Remove(authorFromDb);
+                await dbContext.SaveChangesAsync();
+
             }
             catch (Exception ex)
             {

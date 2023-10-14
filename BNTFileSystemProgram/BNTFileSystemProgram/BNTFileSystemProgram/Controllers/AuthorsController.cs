@@ -6,36 +6,34 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using BussinessLayer;
-using DataLayer;
+using ServiceLayer;
 
 namespace BNTFileSystemProgram.Controllers
 {
     public class AuthorsController : Controller
     {
-        private readonly IDb<Author, string> context;
-        private readonly ApplicationDbContext applicationDbContext;
+        private readonly AuthorManager authorManager;
 
-        public AuthorsController(ApplicationDbContext applicationDbContext, IDb<Author, string>  context)
+        public AuthorsController(AuthorManager authorManager)
         {
-            this.applicationDbContext = applicationDbContext;
-            this.context = context;
+            this.authorManager = authorManager;
         }
 
         // GET: Authors
         public async Task<IActionResult> Index()
         {
-            return View(await context.ReadAllAsync());
+            return View(await authorManager.ReadAllAsync());
         }
 
         // GET: Authors/Details/5
         public async Task<IActionResult> Details(string id)
         {
-            if (id == null || applicationDbContext.Authors == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            var author = await context.ReadAsync(id);
+            var author = await authorManager.ReadAsync(id, true, true);
 
             if (author == null)
             {
@@ -60,7 +58,7 @@ namespace BNTFileSystemProgram.Controllers
         {
             if (ModelState.IsValid)
             {
-                await context.CreateAsync(author);
+                await authorManager.CreateAsync(author);
                 return RedirectToAction(nameof(Index));
             }
             return View(author);
@@ -69,19 +67,16 @@ namespace BNTFileSystemProgram.Controllers
         // GET: Authors/Edit/5
         public async Task<IActionResult> Edit(string id)
         {
-            if (id == null || applicationDbContext.Authors == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
             //await context.UpdateAsync(id);
+            Author author = await authorManager.ReadAsync(id);
 
-
-            Author author = await context.ReadAsync(id);
             if(author == null) { return NotFound(); }
             return View(author);
-
-            return View();
         }
 
         // POST: Authors/Edit/5
@@ -100,11 +95,11 @@ namespace BNTFileSystemProgram.Controllers
             {
                 try
                 {
-                    await context.UpdateAsync(author);
+                    await authorManager.UpdateAsync(author);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!AuthorExists(author.AuthorId))
+                    if (! await AuthorExists(author.AuthorId))
                     {
                         return NotFound();
                     }
@@ -121,14 +116,18 @@ namespace BNTFileSystemProgram.Controllers
         // GET: Authors/Delete/5
         public async Task<IActionResult> Delete(string id)
         {
-            if (id == null || applicationDbContext.Authors == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            await context.DeleteAsync(id);
+            var author = await authorManager.ReadAsync(id, false, false);
+            if (author == null)
+            {
+                return NotFound();
+            }
 
-            return View();
+            return View(author);
         }
 
         // POST: Authors/Delete/5
@@ -136,17 +135,13 @@ namespace BNTFileSystemProgram.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
-            if (applicationDbContext.Authors == null)
-            {
-                return Problem("Entity set 'ApplicationDbContext.Authors'  is null.");
-            }
-            context.DeleteAsync(id);
+            await authorManager.DeleteAsync(id);
             return RedirectToAction(nameof(Index));
         }
 
-        private bool AuthorExists(string id)
+        private async Task<bool> AuthorExists(string id)
         {
-          return (applicationDbContext.Authors?.Any(e => e.AuthorId == id)).GetValueOrDefault();
+            return await authorManager.ReadAsync(id) is not null;
         }
     }
 }

@@ -11,6 +11,7 @@ namespace BussinessLayer
     {
         [Key]
         public string AuthorId { get; set; }
+
         [Required]
         public string AuthorName { get; set; }
         public List<Video> Videos { get; set; }

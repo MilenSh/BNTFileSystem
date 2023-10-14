@@ -7,35 +7,34 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using BussinessLayer;
 using DataLayer;
+using ServiceLayer;
 
 namespace BNTFileSystemProgram.Controllers
 {
     public class VideosController : Controller
     {
-        private readonly ApplicationDbContext applicationDbContext;
-        private readonly IDb<Video, string> context;
+        private readonly VideoManager videoManager;
 
-        public VideosController(ApplicationDbContext applicationDbContext, IDb<Video, string> context)
+        public VideosController(VideoManager videoManager)
         {
-            this.context = context;
-            this.applicationDbContext = applicationDbContext;
+            this.videoManager = videoManager;
         }
 
         // GET: Videos
         public async Task<IActionResult> Index()
         {
-            return View(await context.ReadAllAsync());
+            return View(await videoManager.ReadAllAsync());
         }
 
         // GET: Videos/Details/5
         public async Task<IActionResult> Details(string id)
         {
-            if (id == null || applicationDbContext.Videos == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            var video = await context.ReadAsync(id);
+            var video = await videoManager.ReadAsync(id);
 
             if (video == null)
             {
@@ -62,7 +61,7 @@ namespace BNTFileSystemProgram.Controllers
         {
             if (ModelState.IsValid)
             {
-                await context.CreateAsync(video);
+                await videoManager.CreateAsync(video);
                 return RedirectToAction(nameof(Index));
             }
             //ViewData["FormatId"] = new SelectList(_context.Formats, "FormatId", "FormatId", video.FormatId);
@@ -73,12 +72,12 @@ namespace BNTFileSystemProgram.Controllers
         // GET: Videos/Edit/5
         public async Task<IActionResult> Edit(string id)
         {
-            if (id == null || applicationDbContext.Videos == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            Video video = await context.ReadAsync(id);
+            Video video = await videoManager.ReadAsync(id);
             if (video == null) { return NotFound(); }
             return View(video);
 
@@ -105,11 +104,11 @@ namespace BNTFileSystemProgram.Controllers
             {
                 try
                 {
-                    await context.UpdateAsync(video);
+                    await videoManager.UpdateAsync(video);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!VideoExists(video.VideoId))
+                    if (!await VideoExists(video.VideoId))
                     {
                         return NotFound();
                     }
@@ -128,12 +127,12 @@ namespace BNTFileSystemProgram.Controllers
         // GET: Videos/Delete/5
         public async Task<IActionResult> Delete(string id)
         {
-            if (id == null || applicationDbContext.Videos == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            await context.DeleteAsync(id);
+            await videoManager.DeleteAsync(id);
 
             return View();
         }
@@ -143,17 +142,13 @@ namespace BNTFileSystemProgram.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
-            if (applicationDbContext.Videos == null)
-            {
-                return Problem("Entity set 'ApplicationDbContext.Videos'  is null.");
-            }
-            await context.DeleteAsync(id);
+            await videoManager.DeleteAsync(id);
             return RedirectToAction(nameof(Index));
         }
 
-        private bool VideoExists(string id)
+        private async Task<bool> VideoExists(string id)
         {
-          return (applicationDbContext.Videos?.Any(e => e.VideoId == id)).GetValueOrDefault();
+          return await videoManager.ReadAsync(id) is not null;
         }
     }
 }

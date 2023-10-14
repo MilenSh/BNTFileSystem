@@ -1,5 +1,6 @@
 ﻿using BussinessLayer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,19 +11,19 @@ namespace DataLayer
 {
     public class GenreContext : IDb<Genre, string>
     {
-        private readonly ApplicationDbContext _context;
+        private readonly ApplicationDbContext dbContext;
 
         public GenreContext(ApplicationDbContext context)
         {
-            _context = context;
+            dbContext = context;
         }
 
         public async Task CreateAsync(Genre item)
         {
             try
             {
-                _context.Genres.Add(item);
-                await _context.SaveChangesAsync();
+                dbContext.Genres.Add(item);
+                await dbContext.SaveChangesAsync();
             }
             catch (Exception ex)
             {
@@ -31,59 +32,86 @@ namespace DataLayer
             }
         }
 
-        public async Task<Genre> ReadAsync(string key)
+        public async Task<Genre> ReadAsync(string key, bool useNavigationalProperties = false, bool isReadOnly = true)
         {
             try
             {
-                return await _context.Genres.
-                    Include(v => v.Videos).
-                    SingleAsync(g => g.GenreId == key);
-            }
-            catch (Exception ex)
-            {
+                IQueryable<Genre> query = dbContext.Genres;
 
-                throw new Exception(ex.Message);
-            }
-        }
-
-        public async Task<IEnumerable<Genre>> ReadAllAsync()
-        {
-            try
-            {
-                return await _context.Genres.
-                    Include(v => v.Videos).
-                    ToListAsync();
-            }
-            catch (Exception ex)
-            {
-
-                throw new Exception(ex.Message);
-            }
-        }
-
-        public async Task UpdateAsync(Genre item)
-        {
-            try
-            {
-                _context.Genres.Update(item);
-                await _context.SaveChangesAsync();
-            }
-            catch (Exception ex)
-            {
-
-                throw new Exception(ex.Message);
-            }
-        }
-        public async Task UpdateAsync(string key)
-        {
-            try
-            {
-                Genre? genre = await _context.Genres.FindAsync(key);
-                if(genre != null)
+                if (useNavigationalProperties)
                 {
-                    _context.Genres.Update(genre);
-                    await _context.SaveChangesAsync();
+                    query = query.Include(g => g.Videos);
                 }
+
+                if (isReadOnly)
+                {
+                    query = query.AsNoTrackingWithIdentityResolution();
+                }
+
+                return await query.FirstOrDefaultAsync(g => g.GenreId == key);
+            }
+            catch (Exception ex)
+            {
+
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<IEnumerable<Genre>> ReadAllAsync(bool useNavigationalProperties = false, bool isReadOnly = true)
+        {
+            try
+            {
+                IQueryable<Genre> query = dbContext.Genres;
+
+                if (useNavigationalProperties)
+                {
+                    query = query.Include(g => g.Videos);
+                }
+
+                if (isReadOnly)
+                {
+                    query = query.AsNoTrackingWithIdentityResolution();
+                }
+
+                return await query.ToListAsync();
+            }
+            catch (Exception ex)
+            {
+
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task UpdateAsync(Genre item, bool useNavigationalProperties = false)
+        {
+            try
+            {
+                Genre genreFromDb = await ReadAsync(item.GenreId, useNavigationalProperties, false);
+
+                genreFromDb.Content = item.Content;
+
+                if (useNavigationalProperties)
+                {
+                    List<Video> videos = new List<Video>();
+
+                    foreach (Video video in item.Videos)
+                    {
+                        Video videoFromDb = await dbContext.Videos.FindAsync(video.VideoId);
+
+                        if (videoFromDb != null)
+                        {
+                            videos.Add(videoFromDb);
+                        }
+                        else
+                        {
+                            videos.Add(video);
+                        }
+                    }
+
+                    genreFromDb.Videos = videos;
+                }
+
+                await dbContext.SaveChangesAsync();
             }
             catch (Exception ex)
             {
@@ -96,12 +124,15 @@ namespace DataLayer
         {
             try
             {
-                var genreFromDb = await _context.Genres.FindAsync(key);
-                if (genreFromDb != null)
+                Genre genreFromDb = await ReadAsync(key, false, false);
+
+                if (genreFromDb == null)
                 {
-                    _context.Genres.Remove(genreFromDb);
-                    await _context.SaveChangesAsync();
+                    throw new ArgumentException("The genre with this Id does not exist");
                 }
+
+                dbContext.Genres.Remove(genreFromDb);
+                await dbContext.SaveChangesAsync();
             }
             catch (Exception ex)
             {
