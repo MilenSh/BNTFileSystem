@@ -92,7 +92,7 @@ namespace DataLayer
 
                 if (useNavigationalProperties)
                 {
-                    List<Video> videos = new List<Video>();
+                    List<Video> videos = new();
 
                     foreach (Video video in item.Videos)
                     {

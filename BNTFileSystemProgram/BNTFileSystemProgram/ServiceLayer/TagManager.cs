@@ -12,7 +12,7 @@ namespace ServiceLayer
     {
         private readonly TagContext tagContext;
 
-        public TagManager(TagContext TagContext)
+        public TagManager(TagContext tagContext)
         {
             this.tagContext = tagContext;
         }

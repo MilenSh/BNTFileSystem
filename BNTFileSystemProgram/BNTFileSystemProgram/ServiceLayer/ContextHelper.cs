@@ -9,12 +9,12 @@ namespace ServiceLayer
 {
     public class ContextHelper
     {
-        private static ApplicationDbContext? dbContext;
-        private static AuthorContext? authorContext;
-        private static FormatContext? formatContext;
-        private static GenreContext? genreContext;
-        private static TagContext? tagContext;
-        private static VideoContext? videoContext;
+        private static ApplicationDbContext dbContext;
+        private static AuthorContext authorContext;
+        private static FormatContext formatContext;
+        private static GenreContext genreContext;
+        private static TagContext tagContext;
+        private static VideoContext videoContext;
 
         public static ApplicationDbContext GetDbContext()
         {

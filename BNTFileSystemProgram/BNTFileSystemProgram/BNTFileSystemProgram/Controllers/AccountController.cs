@@ -12,7 +12,6 @@ namespace BNTFileSystemProgram.Controllers
     [AllowAnonymous]
     public class AccountController : Controller
     {
-        private readonly ApplicationDbContext _context;
         private readonly IdentityContext _identityContext;
         private readonly SignInManager<User> _signInManager;
 
@@ -25,9 +24,8 @@ namespace BNTFileSystemProgram.Controllers
         
         }
 
-        public AccountController(ApplicationDbContext context, IdentityContext identityContext, SignInManager<User> signInManager)
+        public AccountController(IdentityContext identityContext, SignInManager<User> signInManager)
         {
-            _context = context;
             _identityContext = identityContext;
             _signInManager = signInManager;
         }

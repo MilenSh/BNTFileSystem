@@ -76,10 +76,6 @@ namespace BNTFileSystemProgram.Controllers
             Genre genre = await genreManager.ReadAsync(id);
             if (genre == null) { return NotFound(); }
             return View(genre);
-
-            //await context.UpdateAsync(id);
-
-            return View();
         }
 
         // POST: Genres/Edit/5
@@ -124,9 +120,14 @@ namespace BNTFileSystemProgram.Controllers
                 return NotFound();
             }
 
-            await genreManager.DeleteAsync(id);
+            Genre genreFromDb = await genreManager.ReadAsync(id, false, true);
 
-            return View();
+            if (genreFromDb == null)
+            {
+                return NotFound();
+            }
+
+            return View(genreFromDb);
         }
 
         // POST: Genres/Delete/5

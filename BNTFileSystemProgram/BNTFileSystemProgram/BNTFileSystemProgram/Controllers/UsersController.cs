@@ -3,7 +3,6 @@ using BusinessLayer;
 using DataLayer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using BNTFileSystemProgram.Models;
@@ -33,7 +32,7 @@ namespace BNTFileSystemProgram.Controllers
             _signInManager = signInManager;
 
 
-            _context.Users.ToList();
+            //_context.Users.ToList();
             
         }
         public async Task<IActionResult> Index(string searchString, int filter)

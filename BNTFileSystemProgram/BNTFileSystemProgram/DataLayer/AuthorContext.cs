@@ -94,11 +94,11 @@ namespace DataLayer
 
                 if (useNavigationalProperties)
                 {
-                    List<Video> videos = new List<Video>(item.Videos.Count);
+                    List<Video> videos = new(item.Videos.Count);
 
                     foreach (var video in item.Videos)
                     {
-                        Video? videoFromDb = await dbContext.Videos.FindAsync(video.VideoId);
+                        Video videoFromDb = await dbContext.Videos.FindAsync(video.VideoId);
 
                         if (videoFromDb is null)
                         {

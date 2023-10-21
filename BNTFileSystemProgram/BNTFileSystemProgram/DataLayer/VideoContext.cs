@@ -22,7 +22,7 @@ namespace DataLayer
         {
             try
             {
-                Format? formatFromDb = await dbContext.Formats.FindAsync(item.Format.FormatId);
+                Format formatFromDb = await dbContext.Formats.FindAsync(item.FormatId);
 
                 if (formatFromDb != null)
                 {
@@ -107,7 +107,7 @@ namespace DataLayer
 
                 if (useNavigationalProperties)
                 {
-                    Format? formatFromDb = await dbContext.Formats.FindAsync(item.Format.FormatId);
+                    Format formatFromDb = await dbContext.Formats.FindAsync(item.Format.FormatId);
 
                     if (formatFromDb != null)
                     {
@@ -122,7 +122,7 @@ namespace DataLayer
 
                     foreach (var author in item.Authors)
                     {
-                        Author? authorFromDb = await dbContext.Authors.FindAsync(author.AuthorId);
+                        Author authorFromDb = await dbContext.Authors.FindAsync(author.AuthorId);
 
                         if (authorFromDb is null)
                         {
@@ -138,7 +138,7 @@ namespace DataLayer
 
                     foreach (var genre in item.Genres)
                     {
-                        Genre? genreFromDb = await dbContext.Genres.FindAsync(genre.GenreId);
+                        Genre genreFromDb = await dbContext.Genres.FindAsync(genre.GenreId);
 
                         if (genreFromDb is null)
                         {
@@ -154,7 +154,7 @@ namespace DataLayer
 
                     foreach (var tag in item.Tags)
                     {
-                        Tag? tagFromDb = await dbContext.Tags.FindAsync(tag.TagId);
+                        Tag tagFromDb = await dbContext.Tags.FindAsync(tag.TagId);
 
                         if (tagFromDb is null)
                         {

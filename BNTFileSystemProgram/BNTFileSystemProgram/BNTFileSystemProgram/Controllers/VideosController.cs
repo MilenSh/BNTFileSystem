@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using BussinessLayer;
 using DataLayer;
 using ServiceLayer;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace BNTFileSystemProgram.Controllers
 {
@@ -23,7 +24,7 @@ namespace BNTFileSystemProgram.Controllers
         // GET: Videos
         public async Task<IActionResult> Index()
         {
-            return View(await videoManager.ReadAllAsync());
+            return View(await videoManager.ReadAllAsync(true));
         }
 
         // GET: Videos/Details/5
@@ -47,25 +48,24 @@ namespace BNTFileSystemProgram.Controllers
         // GET: Videos/Create
         public IActionResult Create()
         {
-            //ViewData["FormatId"] = new SelectList(_context.Formats, "FormatId", "FormatId");
-            //^^^ Тук нямам представа какво трябва да е ^^^
+            ViewData["Format"] = new SelectList(ContextHelper.GetDbContext().Formats, "FormatId", "Extension");
+            ViewData["Genres"] = ContextHelper.GetDbContext().Genres.ToList();
+            ViewData["Authors"] = ContextHelper.GetDbContext().Authors.ToList();
             return View();
         }
 
-        // POST: Videos/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("VideoId,Title,Location,FormatId,Size,Description,Comment,Year,Copyright")] Video video)
         {
+            //Figure out how to recieve chackbox data
             if (ModelState.IsValid)
             {
                 await videoManager.CreateAsync(video);
                 return RedirectToAction(nameof(Index));
             }
-            //ViewData["FormatId"] = new SelectList(_context.Formats, "FormatId", "FormatId", video.FormatId);
-            //^^^ Тук също ^^^
+            //ViewData["Format"] = ContextHelper.GetDbContext().Formats.ToList();
+            ViewData["Format"] = new SelectList(ContextHelper.GetDbContext().Formats, "FormatId", "Extension", video.FormatId);
             return View(video);
         }
 
@@ -77,15 +77,10 @@ namespace BNTFileSystemProgram.Controllers
                 return NotFound();
             }
 
-            Video video = await videoManager.ReadAsync(id);
+            Video video = await videoManager.ReadAsync(id, true);
             if (video == null) { return NotFound(); }
+            ViewData["Format"] = new SelectList(ContextHelper.GetDbContext().Formats, "FormatId", "Extension", video.FormatId);
             return View(video);
-
-            //await context.UpdateAsync(id);
-
-            //ViewData["FormatId"] = new SelectList(_context.Formats, "FormatId", "FormatId", video.FormatId);
-            //^^^ И тук ^^^
-            return View();
         }
 
         // POST: Videos/Edit/5
@@ -119,8 +114,6 @@ namespace BNTFileSystemProgram.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            //ViewData["FormatId"] = new SelectList(_context.Formats, "FormatId", "FormatId", video.FormatId);
-            //^^^ И тук, да ^^^
             return View();
         }
 
@@ -132,9 +125,14 @@ namespace BNTFileSystemProgram.Controllers
                 return NotFound();
             }
 
-            await videoManager.DeleteAsync(id);
+            Video videoFromDb = await videoManager.ReadAsync(id, false, true);
 
-            return View();
+            if (videoFromDb == null)
+            {
+                return NotFound();
+            }
+
+            return View(videoFromDb);
         }
 
         // POST: Videos/Delete/5

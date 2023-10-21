@@ -74,8 +74,6 @@ namespace BNTFileSystemProgram.Controllers
             Format format = await formatManager.ReadAsync(id);
             if (format == null) { return NotFound(); }
             return View(format);
-
-            return View();
         }
 
         // POST: Formats/Edit/5

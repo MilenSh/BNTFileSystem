@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using BussinessLayer;
 using System.Reflection.Emit;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using BusinessLayer;
 
 namespace DataLayer
 {
@@ -57,7 +58,7 @@ namespace DataLayer
 
         public DbSet<Genre> Genres { get; set; }
 
-        public DbSet<BusinessLayer.User> Users { get; set; }
+        public DbSet<User> Users { get; set; }
 
         
     }

@@ -7,7 +7,7 @@ namespace BNTFileSystemProgram.Models
 {
     public class RegisterViewModel : IValidatableObject
     {
-        public string? Id { get; set; }
+        public string Id { get; set; }
         [Required]
         public string Username { get; set; }
         [Required, DisplayName("First Name")]

@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 using BussinessLayer;
+using Microsoft.AspNetCore.Mvc;
 
 namespace BNTFileSystemProgram.Models
 {
@@ -15,7 +16,6 @@ namespace BNTFileSystemProgram.Models
         [ForeignKey("FormatId")]
         public string FormatId { get; set; }
         public Format Format { get; set; }
-
         public List<Genre> Genres { get; set; }
         public double Size { get; set; }
         public string Description { get; set; }

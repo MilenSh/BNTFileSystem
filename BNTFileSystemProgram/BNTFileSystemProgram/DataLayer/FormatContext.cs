@@ -98,7 +98,7 @@ namespace DataLayer
 
                     foreach(Video video in item.Videos)
                     {
-                        Video? videoFromDb = await dbContext.Videos.FindAsync(video.VideoId);
+                        Video videoFromDb = await dbContext.Videos.FindAsync(video.VideoId);
 
                         if(videoFromDb != null)
                         {

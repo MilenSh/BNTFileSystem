@@ -1,4 +1,5 @@
-﻿@model BussinessLayer.Video
+﻿@using BussinessLayer
+@model BussinessLayer.Video
 
 @{
     ViewData["Title"] = "Create";
@@ -25,7 +26,24 @@
             </div>
             <div class="form-group">
                 <label asp-for="FormatId" class="control-label"></label>
-                <select asp-for="FormatId" class ="form-control" asp-items="ViewBag.FormatId"></select>
+                <select asp-for="FormatId" class="form-control" asp-items="ViewBag.Format"></select>
+            </div>
+            <!--The Genres and Authors inputs are inoperational and are in testing-->
+            <div class="form-group">
+                <label class="control-label">Genres</label>
+                <br/>
+                @foreach(Genre item in ViewBag.Genres){
+                    <input class="viewCheckBox" name="Genres" type="checkbox" value="@item"/> @item.Content
+                }
+            </div>
+            <div class="form-group">
+                <label asp-for="Authors" class="control-label"></label>
+                <input asp-for="Authors" type="email" list="authors" multiple>
+                    <datalist id="authors">
+                        @foreach(Author item in ViewBag.Authors){
+                            <option value="@item.AuthorName"/>
+                        }
+                    </datalist>
             </div>
             <div class="form-group">
                 <label asp-for="Size" class="control-label"></label>

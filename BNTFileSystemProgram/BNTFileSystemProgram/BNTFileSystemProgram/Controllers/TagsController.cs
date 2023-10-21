@@ -75,10 +75,6 @@ namespace BNTFileSystemProgram.Controllers
             Tag tag = await tagManager.ReadAsync(id);
             if (tag == null) { return NotFound(); }
             return View(tag);
-
-            //await context.UpdateAsync(id);
-
-            return View();
         }
 
         // POST: Tags/Edit/5
@@ -123,9 +119,14 @@ namespace BNTFileSystemProgram.Controllers
                 return NotFound();
             }
 
-            await tagManager.DeleteAsync(id);
+            Tag tagFromDb = await tagManager.ReadAsync(id, false, true);
 
-            return View();
+            if (tagFromDb == null)
+            {
+                return NotFound();
+            }
+
+            return View(tagFromDb);
         }
 
         // POST: Tags/Delete/5
