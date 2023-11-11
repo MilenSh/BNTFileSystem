@@ -28,7 +28,7 @@ namespace ServiceLayer
             return await formatContext.ReadAsync(key, useNavigationalProperties, isReadOnly);
         }
 
-        public async Task<IEnumerable<Format>> ReadAllAsync(bool useNavigationalProperties = false, bool isReadOnly = true)
+        public async Task<List<Format>> ReadAllAsync(bool useNavigationalProperties = false, bool isReadOnly = true)
         {
             return await formatContext.ReadAllAsync(useNavigationalProperties, isReadOnly);
         }

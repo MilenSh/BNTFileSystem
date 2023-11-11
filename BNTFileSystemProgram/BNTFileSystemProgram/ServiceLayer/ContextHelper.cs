@@ -31,7 +31,7 @@ namespace ServiceLayer
             dbContext = new ApplicationDbContext();
         }
 
-        public static AuthorContext GetAuhtorContext()
+        public static AuthorContext GetAuthorContext()
         {
             if (authorContext == null)
             {

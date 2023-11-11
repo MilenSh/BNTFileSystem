@@ -23,7 +23,7 @@ namespace ServiceLayer
             return await authorContext.ReadAsync(key, useNavigationalProperties, isReadOnly);
         }
 
-        public async Task<IEnumerable<Author>> ReadAllAsync(bool useNavigationalProperties = false, bool isReadOnly = true)
+        public async Task<List<Author>> ReadAllAsync(bool useNavigationalProperties = false, bool isReadOnly = true)
         {
             return await authorContext.ReadAllAsync(useNavigationalProperties, isReadOnly);
         }

@@ -28,7 +28,7 @@ namespace ServiceLayer
             return await genreContext.ReadAsync(key, useNavigationalProperties, isReadOnly);
         }
 
-        public async Task<IEnumerable<Genre>> ReadAllAsync(bool useNavigationalProperties = false, bool isReadOnly = true)
+        public async Task<List<Genre>> ReadAllAsync(bool useNavigationalProperties = false, bool isReadOnly = true)
         {
             return await genreContext.ReadAllAsync(useNavigationalProperties, isReadOnly);
         }

@@ -1,5 +1,6 @@
 ﻿using BussinessLayer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System;
 using System.Collections.Generic;
@@ -27,6 +28,21 @@ namespace DataLayer
                 if (formatFromDb != null)
                 {
                     item.Format = formatFromDb;
+                }
+
+                foreach (var author in item.Authors)
+                {
+                    dbContext.Attach(author);
+                }
+
+                foreach (var genre in item.Genres)
+                {
+                    dbContext.Attach(genre);
+                }
+
+                foreach (var tag in item.Tags)
+                {
+                    dbContext.Attach(tag);
                 }
 
                 dbContext.Videos.Add(item);
@@ -67,7 +83,7 @@ namespace DataLayer
             }
         }
 
-        public async Task<IEnumerable<Video>> ReadAllAsync(bool useNavigationalProperties = false, bool isReadOnly = true)
+        public async Task<List<Video>> ReadAllAsync(bool useNavigationalProperties = false, bool isReadOnly = true)
         {
             try
             {
@@ -101,10 +117,18 @@ namespace DataLayer
             {
                 Video videoFromDb = await ReadAsync(item.VideoId, useNavigationalProperties, false);
 
-                if (videoFromDb == null) { await CreateAsync(item); }
+                if (videoFromDb == null) { return; }
+                //Come up with logic please!
 
-                dbContext.Entry<Video>(videoFromDb).CurrentValues.SetValues(item);
+                videoFromDb.Copyright = item.Copyright;
+                videoFromDb.Year = item.Year;
+                videoFromDb.Title = item.Title;
+                videoFromDb.Description = item.Description;
+                videoFromDb.Location = item.Location;
+                videoFromDb.Comment = item.Comment;
+                videoFromDb.Size = item.Size;
 
+                //try create logic!
                 if (useNavigationalProperties)
                 {
                     Format formatFromDb = await dbContext.Formats.FindAsync(item.Format.FormatId);
@@ -118,7 +142,7 @@ namespace DataLayer
                         item.Format = item.Format;
                     }
 
-                    List<Author> authors = new List<Author>(item.Authors.Count);
+                    List<Author> authors = new (item.Authors.Count);
 
                     foreach (var author in item.Authors)
                     {
@@ -134,7 +158,7 @@ namespace DataLayer
                         }
                     }
 
-                    List<Genre> genres = new List<Genre>(item.Genres.Count);
+                    List<Genre> genres = new (item.Genres.Count);
 
                     foreach (var genre in item.Genres)
                     {
@@ -150,7 +174,7 @@ namespace DataLayer
                         }
                     }
 
-                    List<Tag> tags = new List<Tag>(item.Tags.Count);
+                    List<Tag> tags = new (item.Tags.Count);
 
                     foreach (var tag in item.Tags)
                     {

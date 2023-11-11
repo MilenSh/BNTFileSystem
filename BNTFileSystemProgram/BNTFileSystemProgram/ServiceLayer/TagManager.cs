@@ -28,7 +28,7 @@ namespace ServiceLayer
             return await tagContext.ReadAsync(key, useNavigationalProperties, isReadOnly);
         }
 
-        public async Task<IEnumerable<Tag>> ReadAllAsync(bool useNavigationalProperties = false, bool isReadOnly = true)
+        public async Task<List<Tag>> ReadAllAsync(bool useNavigationalProperties = false, bool isReadOnly = true)
         {
             return await tagContext.ReadAllAsync(useNavigationalProperties, isReadOnly);
         }

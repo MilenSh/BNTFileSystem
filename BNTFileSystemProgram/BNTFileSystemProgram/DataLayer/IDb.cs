@@ -12,7 +12,7 @@ namespace DataLayer
 
         Task<T> ReadAsync(K key, bool useNavigationalProperties, bool isReadOnly);
 
-        Task<IEnumerable<T>> ReadAllAsync(bool useNavigationalProperties, bool isReadOnly);
+        Task<List<T>> ReadAllAsync(bool useNavigationalProperties, bool isReadOnly);
 
         Task UpdateAsync(T item, bool isReadOnly);
 

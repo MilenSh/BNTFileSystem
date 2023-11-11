@@ -28,7 +28,7 @@ namespace ServiceLayer
             return await videoContext.ReadAsync(key, useNavigationalProperties, isReadOnly);
         }
 
-        public async Task<IEnumerable<Video>> ReadAllAsync(bool useNavigationalProperties = false, bool isReadOnly = true)
+        public async Task<List<Video>> ReadAllAsync(bool useNavigationalProperties = false, bool isReadOnly = true)
         {
             return await videoContext.ReadAllAsync(useNavigationalProperties, isReadOnly);
         }

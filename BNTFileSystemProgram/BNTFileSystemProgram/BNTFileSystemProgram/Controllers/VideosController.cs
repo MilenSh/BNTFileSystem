@@ -15,10 +15,16 @@ namespace BNTFileSystemProgram.Controllers
     public class VideosController : Controller
     {
         private readonly VideoManager videoManager;
+        private readonly AuthorManager authorManager;
+        private readonly GenreManager genreManager;
+        private readonly TagManager tagManager;
 
-        public VideosController(VideoManager videoManager)
+        public VideosController(VideoManager videoManager, AuthorManager authorManager, GenreManager genreManager, TagManager tagManager)
         {
             this.videoManager = videoManager;
+            this.authorManager = authorManager;
+            this.genreManager = genreManager;
+            this.tagManager = tagManager;
         }
 
         // GET: Videos
@@ -35,37 +41,33 @@ namespace BNTFileSystemProgram.Controllers
                 return NotFound();
             }
 
-            var video = await videoManager.ReadAsync(id);
+            var video = await videoManager.ReadAsync(id, true);
 
             if (video == null)
             {
                 return NotFound();
             }
-
             return View(video);
         }
 
         // GET: Videos/Create
         public IActionResult Create()
         {
-            ViewData["Format"] = new SelectList(ContextHelper.GetDbContext().Formats, "FormatId", "Extension");
-            ViewData["Genres"] = ContextHelper.GetDbContext().Genres.ToList();
-            ViewData["Authors"] = ContextHelper.GetDbContext().Authors.ToList();
+            LoadNavigationalProperties();
             return View();
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("VideoId,Title,Location,FormatId,Size,Description,Comment,Year,Copyright")] Video video)
+        public async Task<IActionResult> Create(IFormCollection formCollection)
         {
-            //Figure out how to recieve chackbox data
+            Video video = await SetVideoPropertiesAsync(formCollection);
             if (ModelState.IsValid)
             {
                 await videoManager.CreateAsync(video);
                 return RedirectToAction(nameof(Index));
             }
-            //ViewData["Format"] = ContextHelper.GetDbContext().Formats.ToList();
-            ViewData["Format"] = new SelectList(ContextHelper.GetDbContext().Formats, "FormatId", "Extension", video.FormatId);
+            LoadNavigationalProperties();
             return View(video);
         }
 
@@ -79,7 +81,7 @@ namespace BNTFileSystemProgram.Controllers
 
             Video video = await videoManager.ReadAsync(id, true);
             if (video == null) { return NotFound(); }
-            ViewData["Format"] = new SelectList(ContextHelper.GetDbContext().Formats, "FormatId", "Extension", video.FormatId);
+            LoadNavigationalProperties();
             return View(video);
         }
 
@@ -88,12 +90,15 @@ namespace BNTFileSystemProgram.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string id, [Bind("VideoId,Title,Location,FormatId,Size,Description,Comment,Year,Copyright")] Video video)
+        public async Task<IActionResult> Edit(string id, IFormCollection formCollection)
         {
-            if (id != video.VideoId)
+            if (id != formCollection["VideoId"])
             {
                 return NotFound();
             }
+
+            Video video = await SetVideoPropertiesAsync(formCollection);
+            video.VideoId = id;
 
             if (ModelState.IsValid)
             {
@@ -147,6 +152,60 @@ namespace BNTFileSystemProgram.Controllers
         private async Task<bool> VideoExists(string id)
         {
           return await videoManager.ReadAsync(id) is not null;
+        }
+
+        public void LoadNavigationalProperties()
+        {
+            ViewData["Format"] = new SelectList(ContextHelper.GetDbContext().Formats, "FormatId", "Extension") ;
+            ViewData["Genres"] = ContextHelper.GetDbContext().Genres.ToList();
+            ViewData["Authors"] = ContextHelper.GetDbContext().Authors.ToList();
+            ViewData["Tags"] = ContextHelper.GetDbContext().Tags.ToList();
+        }
+
+        public async Task<Video> SetVideoPropertiesAsync(IFormCollection formCollection)
+        {
+            Author authorFromDb;
+            Genre genreFromDb;
+            Tag tagFromDb;
+            Video video = new();
+
+            foreach (string item in formCollection["Authors"])
+            {
+                authorFromDb = await authorManager.ReadAsync(item);
+                if (authorFromDb != null)
+                {
+                    video.Authors.Add(authorFromDb);
+                }
+            }
+
+            foreach (string item in formCollection["Genres"])
+            {
+                genreFromDb = await genreManager.ReadAsync(item);
+                if (genreFromDb != null)
+                {
+                    video.Genres.Add(genreFromDb);
+                }
+            }
+
+            foreach (string item in formCollection["Tags"])
+            {
+                tagFromDb = await tagManager.ReadAsync(item);
+                if (tagFromDb != null)
+                {
+                    video.Tags.Add(tagFromDb);
+                }
+            }
+
+            video.Title = formCollection["Title"];
+            video.Description = formCollection["Description"];
+            video.FormatId = formCollection["FormatId"];
+            video.Location = formCollection["Location"];
+            video.Size = double.Parse(formCollection["Size"]);
+            video.Comment = formCollection["Comment"];
+            video.Copyright = formCollection["Copyright"];
+            video.Year = int.Parse(formCollection["Year"]);
+
+            return video;
         }
     }
 }
